@@ -15,5 +15,14 @@ class ViewController: UIViewController {
     }
 
 
+    @IBOutlet weak var scoreLabel: UILabel!
+
+    @IBAction func newGame(_ sender: UIButton) {
+    }
+
+    @IBAction func deal3MoreCards(_ sender: UIButton) {
+    }
+
+    @IBOutlet var cardButtons: [UIButton]!
 }
 
