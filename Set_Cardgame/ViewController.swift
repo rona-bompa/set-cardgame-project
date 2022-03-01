@@ -7,17 +7,31 @@
 
 import UIKit
 
+enum colors {
+
+}
+
+enum shapes {
+    
+}
+
 class ViewController: UIViewController {
+
+    private lazy var game = Set()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
     }
-
 
     @IBOutlet weak var scoreLabel: UILabel!
 
     @IBAction func newGame(_ sender: UIButton) {
+        // tests
+        print(game.deckCards)
+        print(game.deckCards.count)
+        print("\n")
+        print(game.listOfCardsBeingPlayed)
+        print(game.listOfCardsBeingPlayed.count)
     }
 
     @IBAction func deal3MoreCards(_ sender: UIButton) {
