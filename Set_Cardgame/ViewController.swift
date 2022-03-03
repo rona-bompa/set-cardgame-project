@@ -7,24 +7,24 @@
 
 import UIKit
 
-enum colors {
-
-}
-
-enum shapes {
-    
-}
-
 class ViewController: UIViewController {
 
     private lazy var game = Set()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateViewFromModel()
+        updatePlayingCardsViewFromModel()
     }
 
     @IBOutlet weak var scoreLabel: UILabel!
+    @IBOutlet var cardButtons: [UIButton]!
+
+    @IBAction func touchCard(_ sender: UIButton) {
+        if let cardNumber = cardButtons.firstIndex(of: sender) {
+            game.selectCard(at: cardNumber)
+            updateSelectedCardsViewFromModel()
+        }
+    }
 
     @IBAction func newGame(_ sender: UIButton) {
         // tests
@@ -34,20 +34,19 @@ class ViewController: UIViewController {
         print(game.listOfCardsBeingPlayed.count)
 
         game.newGame()
-        updateViewFromModel()
+        updatePlayingCardsViewFromModel()
+        updateSelectedCardsViewFromModel()
     }
 
     @IBAction func deal3MoreCards(_ sender: UIButton) {
+
     }
 
-    @IBOutlet var cardButtons: [UIButton]!
-
-    func updateViewFromModel() {
-
+    func updatePlayingCardsViewFromModel() {
+        // hide all cards
         for index in cardButtons.indices{
             cardButtons[index].isHidden = true
         }
-
         // display cards being played
         for index in game.listOfCardsBeingPlayed.indices {
 
@@ -55,7 +54,7 @@ class ViewController: UIViewController {
             var string = game.listOfCardsBeingPlayed[index].shapes.description
             if(game.listOfCardsBeingPlayed[index].numberOfShapes > 2) {
                 for _ in 2...game.listOfCardsBeingPlayed[index].numberOfShapes {
-                     string += "\n" + game.listOfCardsBeingPlayed[index].shapes.description
+                    string += "\n" + game.listOfCardsBeingPlayed[index].shapes.description
                 }
             }
             
@@ -77,8 +76,24 @@ class ViewController: UIViewController {
             cardButtons[index].layer.cornerRadius = 8.0
             cardButtons[index].isHidden = false
         }
+    }
 
+    func updateSelectedCardsViewFromModel() {
+        // no border for all cards
+        for index in cardButtons.indices{
+            cardButtons[index].layer.borderWidth = 0.0
+        }
 
+        // blue border for selected cards
+        for cardSelected in game.selectedCards {
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderWidth = 3.0
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderColor = UIColor.blue.cgColor
+        }
+
+        for card in game.matchedCards {
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: card) ?? 0].layer.borderWidth = 3.0
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: card) ?? 0].layer.borderColor = UIColor.green.cgColor
+        }
     }
 }
 
