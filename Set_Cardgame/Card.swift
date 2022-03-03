@@ -24,25 +24,53 @@ struct Card: Equatable {
         var description: String { return rawValue }
     }
 
-    enum Color: String, CustomStringConvertible {
+    enum Color: String {
         case red = "red"
         case purple = "purple"
         case green = "green"
 
         static var all = [Color.red,.purple,.green]
 
-        var description: String { return rawValue }
-
+        func colorUI() -> UIColor {
+            switch self {
+            case .red:
+                return UIColor.red
+            case .purple:
+                return UIColor.purple
+            case .green:
+                return UIColor.green
+            }
+        }
     }
 
-    enum Filling: String, CustomStringConvertible {
+    enum Filling: String {
         case empty = "empty"
         case stripped = "stripped"
         case full = "full"
 
         static var all = [Filling.empty,.stripped,.full]
 
-        var description: String { return rawValue }
+        func strokeWidth() -> Float {
+            switch self {
+            case .empty:
+                return 5.0
+            case .stripped:
+                return 0.0
+            case .full:
+                return 0.0
+            }
+        }
+
+        func alphaComponent() -> Double {
+            switch self {
+            case .empty:
+                return 0.0
+            case .stripped:
+                return 0.20
+            case .full:
+                return 1.0
+            }
+        }
     }
 
 }

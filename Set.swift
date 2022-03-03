@@ -15,7 +15,12 @@ class Set {
 //    var matchedCards: [Card]
 
     init() {
-        // init the deck of Cards
+        newGame()
+    }
+
+    func newGame() {
+        deckCards.removeAll()
+        listOfCardsBeingPlayed.removeAll()
         for shape in Card.Shape.all {
             for color in Card.Color.all {
                 for filling in Card.Filling.all {
@@ -38,6 +43,7 @@ class Set {
     // logica jocului
 
     // functionality #2: dealing three new cards
+
 
 }
 
