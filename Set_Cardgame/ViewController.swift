@@ -13,36 +13,41 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updatePlayingCardsViewFromModel()
+        updateCardsContentViewFromModel()
     }
 
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet var cardButtons: [UIButton]!
 
     @IBAction func touchCard(_ sender: UIButton) {
+        // tests
+        print("deck: \(game.deckCards.count)")
+        print("played:  \(game.listOfCardsBeingPlayed.count)")
+        print("selected: \(game.selectedCards.count)")
+        print("matched: \(game.matchedCards.count) \n")
+
         if let cardNumber = cardButtons.firstIndex(of: sender) {
             game.selectCard(at: cardNumber)
-            updateSelectedCardsViewFromModel()
+            updateCardsContentViewFromModel()
+            updateCardsBorderViewFromModel()
         }
     }
 
     @IBAction func newGame(_ sender: UIButton) {
-        // tests
-        print(game.deckCards.count)
-        print("\n")
-        print(game.listOfCardsBeingPlayed)
-        print(game.listOfCardsBeingPlayed.count)
-
         game.newGame()
-        updatePlayingCardsViewFromModel()
-        updateSelectedCardsViewFromModel()
+        updateCardsContentViewFromModel()
+        updateCardsBorderViewFromModel()
     }
 
     @IBAction func deal3MoreCards(_ sender: UIButton) {
-
+//        if game.listOfCardsBeingPlayed.count < 24 {
+//            sender.isEnabled = true
+            game.dealThreeMoreCards()
+            updateCardsContentViewFromModel()
+            updateCardsBorderViewFromModel()
     }
 
-    func updatePlayingCardsViewFromModel() {
+    func updateCardsContentViewFromModel() {
         // hide all cards
         for index in cardButtons.indices{
             cardButtons[index].isHidden = true
@@ -78,21 +83,26 @@ class ViewController: UIViewController {
         }
     }
 
-    func updateSelectedCardsViewFromModel() {
+    func updateCardsBorderViewFromModel() {
         // no border for all cards
         for index in cardButtons.indices{
             cardButtons[index].layer.borderWidth = 0.0
         }
 
-        // blue border for selected cards
-        for cardSelected in game.selectedCards {
-            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderWidth = 3.0
-            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderColor = UIColor.blue.cgColor
+        var borderColor = UIColor.blue.cgColor
+        switch game.matchColor {
+        case .yes:
+            borderColor = UIColor.green.cgColor
+        case .no:
+            borderColor = UIColor.red.cgColor
+        case .notYetThreeCards:
+            borderColor = UIColor.blue.cgColor
         }
 
-        for card in game.matchedCards {
-            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: card) ?? 0].layer.borderWidth = 3.0
-            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: card) ?? 0].layer.borderColor = UIColor.green.cgColor
+        // borderColor for selected cards
+        for cardSelected in game.selectedCards {
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderWidth = 3.0
+            cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderColor = borderColor
         }
     }
 }
