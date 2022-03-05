@@ -346,6 +346,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="deal3moreCards" destination="PSO-iL-oqP" id="euc-hJ-Ypv"/>
                         <outlet property="scoreLabel" destination="c5T-dZ-VhD" id="WFM-t7-WAr"/>
                         <outletCollection property="cardButtons" destination="kwI-eO-LOp" collectionClass="NSMutableArray" id="iIO-NP-0XV"/>
                         <outletCollection property="cardButtons" destination="oQA-S7-M14" collectionClass="NSMutableArray" id="5vm-v6-Ryg"/>

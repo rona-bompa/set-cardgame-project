@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+// this enum is the only solution I could think of for the green/red bordering color after selected
 enum Match {
     case yes
     case no
@@ -20,13 +21,15 @@ class Set {
     var listOfCardsBeingPlayed = [Card]()
     var selectedCards = [Card]()
     var matchedCards = [Card]()
-    var matchColor: Match = Match.notYetThreeCards
+    var areAMatch: Match = Match.notYetThreeCards
+    var score = 0
 
     init() {
         newGame()
     }
 
     func newGame() {
+        score = 0
         deckCards.removeAll()
         listOfCardsBeingPlayed.removeAll()
         selectedCards.removeAll()
@@ -45,7 +48,10 @@ class Set {
         // init the list of cards Being Played
         for index in 0...11 {
             listOfCardsBeingPlayed.append(deckCards[index])
-            deckCards.remove(at: 0) // remove the element just added
+        }
+
+        for card in listOfCardsBeingPlayed {
+            deckCards.remove(at: deckCards.firstIndex(of: card)!)
         }
     }
 
@@ -54,83 +60,140 @@ class Set {
         let selectedCard = listOfCardsBeingPlayed[index]
 
         switch selectedCards.count {
-        case 0:
+        case 0: // no cards selected
             selectedCards.append(selectedCard)
-            matchColor = Match.notYetThreeCards
-        case 1:
+            areAMatch = Match.notYetThreeCards
+        case 1: // 1 card already selected
             if !selectedCards.contains(selectedCard) {
                 selectedCards.append(selectedCard)
-                matchColor = Match.notYetThreeCards
             } else {
                 selectedCards.remove(at: selectedCards.firstIndex(of: selectedCard)!)
+                score -= 1
             }
-        case 2:
+            areAMatch = Match.notYetThreeCards
+        case 2: // 2 cards already selected
             if !selectedCards.contains(selectedCard) {
                 selectedCards.append(selectedCard)
                 if selectedCardsMatch() {
-                    matchColor = Match.yes
+                    areAMatch = Match.yes
                 } else {
-                    matchColor = Match.no
+                    areAMatch = Match.no
                 }
             } else {
                 selectedCards.remove(at: selectedCards.firstIndex(of: selectedCard)!)
+                score -= 1
+                areAMatch = Match.notYetThreeCards
             }
-        case 3:
+        case 3: // 3 cards already selected
             if !selectedCards.contains(selectedCard) {
                 if !selectedCardsMatch() {
                     // they don't match
+                    score -= 5
                     selectedCards.removeAll()
                 } else {
                     // they match -> replace cards
                     dealThreeMoreCards()
-                    matchColor = Match.notYetThreeCards
                 }
-                matchColor = Match.notYetThreeCards
                 selectedCards.append(selectedCard)
+                areAMatch = Match.notYetThreeCards
             }
         default: break
         }
     }
-
-    // Game logic for matching sets
+    // The game logic for a matching set is 3 cards where EACH of the 4 characteristics is either all the same or all different
     // TODO: REAL GAME LOGIC
     private func selectedCardsMatch() -> Bool {
-         // match var 1) same number of shapes
+        // ACTUAL GAME LOGIC
+        var isSet = false
+        if (selectedCards[0].color == selectedCards[1].color &&
+            selectedCards[1].color == selectedCards[2].color) ||
+            (selectedCards[0].color != selectedCards[1].color &&
+             selectedCards[1].color != selectedCards[2].color &&
+             selectedCards[0].color != selectedCards[2].color)
+        {
+            if (selectedCards[0].shapes == selectedCards[1].shapes &&
+                selectedCards[1].shapes == selectedCards[2].shapes) ||
+                (selectedCards[0].shapes != selectedCards[1].shapes &&
+                 selectedCards[1].shapes != selectedCards[2].shapes &&
+                 selectedCards[0].shapes != selectedCards[2].shapes)
+            {
+                if (selectedCards[0].filling == selectedCards[1].filling &&
+                    selectedCards[1].filling == selectedCards[2].filling) ||
+                    (selectedCards[0].filling != selectedCards[1].filling &&
+                     selectedCards[1].filling != selectedCards[2].filling &&
+                     selectedCards[0].filling != selectedCards[2].filling)
+                {
+                    if (selectedCards[0].numberOfShapes == selectedCards[1].numberOfShapes &&
+                        selectedCards[1].numberOfShapes == selectedCards[2].numberOfShapes) ||
+                        (selectedCards[0].numberOfShapes != selectedCards[1].numberOfShapes &&
+                         selectedCards[1].numberOfShapes != selectedCards[2].numberOfShapes &&
+                         selectedCards[0].numberOfShapes != selectedCards[2].numberOfShapes)
+                    {
+                        isSet = true
+                    }
+                }
+            }
+        }
+
+         // MARK: test version of "game logic"
+        /*
         if selectedCards[0].color == selectedCards[1].color &&
             selectedCards[1].color == selectedCards[2].color {
-            return true
+            isSet = true
         } else {
-            return false
+            isSet = false
         }
+         */
+        return isSet
     }
 
     // MARK: functionality #2: dealing three new cards
     func dealThreeMoreCards() {
-        if deckCards.count > 0 { // if there are cards in deck
-            switch selectedCards.count {
-            case 0...2:
+        switch selectedCards.count {
+        case 0...2:
+            score -= selectedCards.count
+            for _ in 0...2 { // add 3 more cards
+                let randomIndex = deckCards.count.arc4random
+                listOfCardsBeingPlayed.append(deckCards[randomIndex])
+                deckCards.remove(at: randomIndex)
+            }
+        case 3:
+            if selectedCardsMatch(){
+                score += 3
+                if listOfCardsBeingPlayed.count <= 12 && listOfCardsBeingPlayed.count > 0 { // if there are less than 12 cards
+                        for card in selectedCards {
+                            matchedCards.append(card) // append the matched cards
+                            if deckCards.count > 0 { // if there are cards in deck, replace
+                                let randomIndex = deckCards.count.arc4random // index for random new card
+                                if let cardIndex = listOfCardsBeingPlayed.firstIndex(of: card) {
+                                    listOfCardsBeingPlayed[cardIndex] = deckCards[randomIndex] // replace
+                                }
+                                deckCards.remove(at: randomIndex) // remove from deck of cards
+                            } else { // just remove, don't replace
+                                if let cardIndex = listOfCardsBeingPlayed.firstIndex(of: card) {
+                                    listOfCardsBeingPlayed.remove(at: cardIndex)
+                                }
+                            }
+                        }
+                } else { // don't replace
+                    for card in selectedCards {
+                        matchedCards.append(card) // append the matched cards
+                        if let cardIndex = listOfCardsBeingPlayed.firstIndex(of: card) {
+                            listOfCardsBeingPlayed.remove(at: cardIndex)
+                        }
+                    }
+                }
+            } else {
+                score -= 5
                 for _ in 0...2 { // add 3 more cards
                     let randomIndex = deckCards.count.arc4random
                     listOfCardsBeingPlayed.append(deckCards[randomIndex])
                     deckCards.remove(at: randomIndex)
-                    selectedCards.removeAll()
                 }
-            case 3:
-                if listOfCardsBeingPlayed.count > 0 {
-                    if selectedCardsMatch() {
-                        for card in selectedCards {
-                            matchedCards.append(card) // append the matched cards
-                            let randomIndex = deckCards.count.arc4random // index for random new card
-                            let cardIndex = listOfCardsBeingPlayed.firstIndex(of: card) // the index card of the selected one
-                            listOfCardsBeingPlayed[cardIndex!] = deckCards[randomIndex] // we
-                            deckCards.remove(at: randomIndex) // remove from deck of cards
-                        }
-                        selectedCards.removeAll() // remove all selected cards
-                    }
-                }
-            default: break
             }
+        default: break
         }
+    selectedCards.removeAll()
     }
 }
 
@@ -146,4 +209,10 @@ extension Int {
     }
 }
 
-// maybe another closure could be one with the index?
+// MARK: what about this extension?
+//extension Array {
+//    func removeCardAtIndex(element: Element) -> Array<Element> {
+//        return self.remove(at: self.firstIndex(of: element))
+//    }
+//}
+

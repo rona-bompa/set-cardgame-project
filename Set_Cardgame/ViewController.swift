@@ -11,58 +11,60 @@ class ViewController: UIViewController {
 
     private lazy var game = Set()
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        updateCardsContentViewFromModel()
-    }
-
     @IBOutlet weak var scoreLabel: UILabel!
     @IBOutlet var cardButtons: [UIButton]!
+    @IBOutlet weak var deal3moreCards: UIButton!
 
-    @IBAction func touchCard(_ sender: UIButton) {
-        // tests
-        print("deck: \(game.deckCards.count)")
-        print("played:  \(game.listOfCardsBeingPlayed.count)")
-        print("selected: \(game.selectedCards.count)")
-        print("matched: \(game.matchedCards.count) \n")
-
-        if let cardNumber = cardButtons.firstIndex(of: sender) {
-            game.selectCard(at: cardNumber)
-            updateCardsContentViewFromModel()
-            updateCardsBorderViewFromModel()
-        }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        updateViewFromModel()
     }
 
     @IBAction func newGame(_ sender: UIButton) {
         game.newGame()
-        updateCardsContentViewFromModel()
-        updateCardsBorderViewFromModel()
+        updateViewFromModel()
     }
 
+    @IBAction func touchCard(_ sender: UIButton) {
+        if let cardNumber = cardButtons.firstIndex(of: sender) {
+            game.selectCard(at: cardNumber)
+            updateViewFromModel()
+        }
+    }
+    
     @IBAction func deal3MoreCards(_ sender: UIButton) {
-//        if game.listOfCardsBeingPlayed.count < 24 {
-//            sender.isEnabled = true
-            game.dealThreeMoreCards()
-            updateCardsContentViewFromModel()
-            updateCardsBorderViewFromModel()
+        //        if game.listOfCardsBeingPlayed.count < 24 {
+        //            sender.isEnabled = true
+        game.dealThreeMoreCards()
+        updateViewFromModel()
     }
 
-    func updateCardsContentViewFromModel() {
-        // hide all cards
+    func updateViewFromModel() {
+        // ENABLE/ DISABLE - Deal 3 more cards button
+        if game.deckCards.count == 0 || game.listOfCardsBeingPlayed.count == 24 {
+            deal3moreCards.isEnabled = false
+        } else {
+            deal3moreCards.isEnabled = true
+        }
+
+        // HIDE all cards & NO border
         for index in cardButtons.indices{
             cardButtons[index].isHidden = true
+            cardButtons[index].layer.borderWidth = 0.0
         }
-        // display cards being played
+        // DISPLAY cards when being played
         for index in game.listOfCardsBeingPlayed.indices {
 
+            var string = ""
+            let shape = game.listOfCardsBeingPlayed[index].shapes.description
             // building the string of shapes according to the number of shapes
-            var string = game.listOfCardsBeingPlayed[index].shapes.description
-            if(game.listOfCardsBeingPlayed[index].numberOfShapes > 2) {
-                for _ in 2...game.listOfCardsBeingPlayed[index].numberOfShapes {
-                    string += "\n" + game.listOfCardsBeingPlayed[index].shapes.description
-                }
+            switch game.listOfCardsBeingPlayed[index].numberOfShapes {
+            case 1: string = shape
+            case 2: string = shape + "\n" + shape
+            case 3: string = shape + "\n" + shape + "\n" + shape
+            default: string = ""
             }
-            
+
             let color = game.listOfCardsBeingPlayed[index].color.colorUI()
             let strokeWidth = game.listOfCardsBeingPlayed[index].filling.strokeWidth()
             let alphaComponent = game.listOfCardsBeingPlayed[index].filling.alphaComponent()
@@ -81,16 +83,10 @@ class ViewController: UIViewController {
             cardButtons[index].layer.cornerRadius = 8.0
             cardButtons[index].isHidden = false
         }
-    }
 
-    func updateCardsBorderViewFromModel() {
-        // no border for all cards
-        for index in cardButtons.indices{
-            cardButtons[index].layer.borderWidth = 0.0
-        }
-
+        // BORDER color
         var borderColor = UIColor.blue.cgColor
-        switch game.matchColor {
+        switch game.areAMatch {
         case .yes:
             borderColor = UIColor.green.cgColor
         case .no:
@@ -104,6 +100,9 @@ class ViewController: UIViewController {
             cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderWidth = 3.0
             cardButtons[game.listOfCardsBeingPlayed.firstIndex(of: cardSelected) ?? 0].layer.borderColor = borderColor
         }
+
+        // SCORE
+        scoreLabel.text = "Score: \(game.score)"
     }
 }
 
